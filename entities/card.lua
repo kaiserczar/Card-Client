@@ -33,6 +33,7 @@ function Card:initialize(game, name, img, origX, origY, normalScale, hoverScale,
 	self.UID = Card.sessionUID
 	Card.sessionUID = Card.sessionUID + 1
 	self.zone = nil
+	self.prevZone = nil
 	self.wasMouseOver = false
 	
 	self.stdWidth = (self.img:getWidth()*self.normalScale)
@@ -44,7 +45,7 @@ function Card:update(dt)
 
 	if self:isMouseOver(love.mouse.getX(),love.mouse.getY()) then
 		if not self.wasMouseOver then
-			self.game.setHoverImage(self.img)
+			self.game:setHoverImage(self.img)
 			self.wasMouseOver = true
 		end
 	else
@@ -83,15 +84,15 @@ end
 function Card:draw()
 
 	if self:isMouseOver(love.mouse.getX(),love.mouse.getY()) and self.doesHover then
-		love.graphics.draw(self.img, self.x, self.y, 0, self.hoverScale, self.hoverScale, 125, 175)
+		love.graphics.draw(self.img, self.x, self.y, 0, self.hoverScale, self.hoverScale, self.img:getWidth()/2, self.img:getHeight()/2)
 	else
-		love.graphics.draw(self.img, self.x, self.y, 0, self.normalScale, self.normalScale, 125, 175)
+		love.graphics.draw(self.img, self.x, self.y, 0, self.normalScale, self.normalScale, self.img:getWidth()/2, self.img:getHeight()/2)
 	end
 
 end
 
 function Card:isMouseOver(x, y)
-	return x >= self.x-125*self.normalScale and x <= self.x+125*self.normalScale and y <= self.y+175*self.normalScale and y >= self.y-175*self.normalScale
+	return x >= self.x-self.img:getWidth()/2*self.normalScale and x <= self.x+self.img:getWidth()/2*self.normalScale and y <= self.y+self.img:getHeight()/2*self.normalScale and y >= self.y-self.img:getHeight()/2*self.normalScale
 end
 
 -- Given the space the card can fill, sets the maximum scaling.
@@ -124,6 +125,7 @@ function Card:setZone(zone)
 	if zone ~= nil then
 		self.doReturnToOriginalPosition = true
 		print("Card " .. tostring(self.UID) .. " moved to zone " .. tostring(zone.UID))
+		self.prevZone = zone
 	else
 		self.doReturnToOriginalPosition = false
 		print("Card " .. tostring(self.UID) .. " moved to zone nil.")

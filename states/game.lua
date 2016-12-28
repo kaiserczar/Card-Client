@@ -49,7 +49,16 @@ function game:keypressed(key, code)
 			end
 		end
 	elseif key == "a" then
-		newCard = Card:new(self,"placeholder",love.graphics.newImage('assets/img/card.png'),love.mouse.getX(),love.mouse.getY(),0.5,0.75,false,100,100)
+		whichPic = math.random(4)
+		if whichPic==1 then
+			newCard = Card:new(self,"placeholder",love.graphics.newImage('assets/img/card1.jpg'),love.mouse.getX(),love.mouse.getY(),0.5,0.75,false,100,100)
+		elseif whichPic==2 then
+			newCard = Card:new(self,"placeholder",love.graphics.newImage('assets/img/card2.jpg'),love.mouse.getX(),love.mouse.getY(),0.5,0.75,false,100,100)
+		elseif whichPic==3 then
+			newCard = Card:new(self,"placeholder",love.graphics.newImage('assets/img/card3.jpg'),love.mouse.getX(),love.mouse.getY(),0.5,0.75,false,100,100)
+		else
+			newCard = Card:new(self,"placeholder",love.graphics.newImage('assets/img/card4.jpg'),love.mouse.getX(),love.mouse.getY(),0.5,0.75,false,100,100)
+		end
 		newCard.name = "card"..tostring(newCard.UID)
 		table.insert(self.cards,newCard)
 		self.zones[6]:addCard(newCard)
@@ -79,12 +88,17 @@ function game:mousereleased(x, y, mbutton)
 	for i, card in ipairs(self.cards) do
 		if card.isDragging then
 			card.isDragging = false
+			isInZone = false
 			for i, zone in ipairs(self.zones) do
 				if zone:isInZone(card.x,card.y) then
 					-- enter the zone here
 					zone:addCard(card)
+					isInZone = true
 					break
 				end
+			end
+			if not isInZone then
+				card.prevZone:addCard(card)
 			end
 			break
 		end
