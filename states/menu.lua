@@ -4,14 +4,14 @@ menu.items = {
     {
         title = "JOIN GAME",
         action = function()
-            state.switch(game)
+            state.switch(join)
         end,
 		fontSize = 38,
     },
 	{
         title = "HOST GAME",
         action = function()
-            state.switch(game)
+            state.switch(host)
         end,
 		fontSize = 38,
     },
@@ -96,7 +96,9 @@ function menu:update(dt)
 end
 
 function menu:keyreleased(key, code)
-
+	if key == "escape" and love.keyboard.isDown("lctrl", "rctrl") then
+        love.event.quit()
+    end
 end
 
 function menu:mousepressed(x, y, mbutton)

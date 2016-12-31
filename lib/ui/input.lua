@@ -25,7 +25,7 @@ end
 function Input:update(dt)
     self.caretTimer = self.caretTimer + dt
 
-    if self.caretTimer >= 2 then self.caretTimer = 0 end
+    if self.caretTimer >= 1 then self.caretTimer = 0 end
 end
 
 function Input:textinput(text)
@@ -55,9 +55,9 @@ function Input:draw()
     self.text = string.upper(self.text)
 
     -- technically this would go in some kind of update function, but its a hack
-    if self:hover() and love.mouse.isDown("l") then
+    if self:hover() and love.mouse.isDown(1) then
         self.selected = true
-    elseif not self:hover() and love.mouse.isDown("l") then
+    elseif not self:hover() and love.mouse.isDown(1) then
         self.selected = false
     end
 
@@ -94,7 +94,7 @@ function Input:draw()
     if self.selected then
         love.graphics.setLineWidth(13)
 
-        if self.caretTimer > 1 then
+        if self.caretTimer > 0.5 then
             self.alpha = 255
         else
             self.alpha = 0

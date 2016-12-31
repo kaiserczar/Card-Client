@@ -2,15 +2,18 @@
 class = require 'lib.middleclass'
 vector = require 'lib.vector'
 state = require 'lib.state'
-tween = require 'lib.tween'
 serialize = require 'lib.ser'
 signal = require 'lib.signal'
+sock = require 'lib.sock'
 require 'lib.util'
+
 
 -- gamestates
 require 'states.menu'
 require 'states.game'
 require 'states.options'
+require 'states.join'
+require 'states.host'
 
 -- entities
 require 'entities.sound'
@@ -78,9 +81,7 @@ function love.load()
 end
 
 function love.keypressed(key, code)
-    if key == "escape" then
-        love.event.quit()
-    end
+    
 end
 
 function love.mousepressed(x, y, mbutton)

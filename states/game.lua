@@ -3,7 +3,7 @@ game = {}
 -- Game TODO:
 --      * Add identity and title to conf.lua
 
-function game:enter()
+function game:init()
 	self.cards = {}
 	--table.insert(self.cards,Card:new("card1",love.graphics.newImage('assets/img/card.png'),love.graphics.getWidth()/2-500,love.graphics.getHeight()/2+250,0.5,0.75,false,100,100))
 	--table.insert(self.cards,Card:new("card2",love.graphics.newImage('assets/img/card.png'),love.graphics.getWidth()/2,love.graphics.getHeight()/2+250,0.5,0.75,false,100,100))
@@ -14,12 +14,12 @@ function game:enter()
 	self.zones = {}
 	table.insert(self.zones,CardZone:new("foeMainHand",5,5,(love.graphics.getWidth()-15)/2,(love.graphics.getHeight()-40)/7))
 	table.insert(self.zones,CardZone:new("foeResHand",10+(love.graphics.getWidth()-15)/2,5,(love.graphics.getWidth()-15)/2,(love.graphics.getHeight()-40)/7))
-	table.insert(self.zones,CardZone:new("foeBuilding",5,10+(love.graphics.getHeight()-40)/7,(love.graphics.getWidth()-15)/2,(love.graphics.getHeight()-40)/7))
-	table.insert(self.zones,CardZone:new("foeMagic",10+(love.graphics.getWidth()-15)/2,10+(love.graphics.getHeight()-40)/7,(love.graphics.getWidth()-15)/2,(love.graphics.getHeight()-40)/7))
-	table.insert(self.zones,CardZone:new("foeMonster",5,15+2*(love.graphics.getHeight()-40)/7,(love.graphics.getWidth()-10),(love.graphics.getHeight()-40)/7))
-	table.insert(self.zones,CardZone:new("youMonster",5,20+3*(love.graphics.getHeight()-40)/7,(love.graphics.getWidth()-10),(love.graphics.getHeight()-40)/7))
-	table.insert(self.zones,CardZone:new("youBuilding",5,25+4*(love.graphics.getHeight()-40)/7,(love.graphics.getWidth()-15)/2,(love.graphics.getHeight()-40)/7))
-	table.insert(self.zones,CardZone:new("youMagic",10+(love.graphics.getWidth()-15)/2,25+4*(love.graphics.getHeight()-40)/7,(love.graphics.getWidth()-15)/2,(love.graphics.getHeight()-40)/7))
+	table.insert(self.zones,CardZone:new("foeConstruction",5,10+(love.graphics.getHeight()-40)/7,(love.graphics.getWidth()-15)/2,(love.graphics.getHeight()-40)/7))
+	table.insert(self.zones,CardZone:new("foeSpell",10+(love.graphics.getWidth()-15)/2,10+(love.graphics.getHeight()-40)/7,(love.graphics.getWidth()-15)/2,(love.graphics.getHeight()-40)/7))
+	table.insert(self.zones,CardZone:new("foeCreature",5,15+2*(love.graphics.getHeight()-40)/7,(love.graphics.getWidth()-10),(love.graphics.getHeight()-40)/7))
+	table.insert(self.zones,CardZone:new("youCreature",5,20+3*(love.graphics.getHeight()-40)/7,(love.graphics.getWidth()-10),(love.graphics.getHeight()-40)/7))
+	table.insert(self.zones,CardZone:new("youConstruction",5,25+4*(love.graphics.getHeight()-40)/7,(love.graphics.getWidth()-15)/2,(love.graphics.getHeight()-40)/7))
+	table.insert(self.zones,CardZone:new("youSpell",10+(love.graphics.getWidth()-15)/2,25+4*(love.graphics.getHeight()-40)/7,(love.graphics.getWidth()-15)/2,(love.graphics.getHeight()-40)/7))
 	table.insert(self.zones,CardZone:new("youResHand",5+love.graphics.getWidth()/2,30+5*(love.graphics.getHeight()-40)/7,love.graphics.getWidth()/2-10,(love.graphics.getHeight()-40)/7))
 	table.insert(self.zones,CardZone:new("youMainHand",5+love.graphics.getWidth()/2,35+6*(love.graphics.getHeight()-40)/7,love.graphics.getWidth()/2-10,(love.graphics.getHeight()-40)/7))
 	
@@ -27,6 +27,10 @@ function game:enter()
 	self.hoverImgScale = 1
 	
 	self:setHoverImage(love.graphics.newImage("assets/img/cardBack.jpg"))
+end
+
+function game:enter()
+	
 end
 
 function game:update(dt)
@@ -62,7 +66,9 @@ function game:keypressed(key, code)
 		newCard.name = "card"..tostring(newCard.UID)
 		table.insert(self.cards,newCard)
 		self.zones[6]:addCard(newCard)
-	end
+	elseif key == "escape" then
+        state.switch(menu)
+    end
 end
 
 function game:mousepressed(x, y, mbutton)
