@@ -5,16 +5,17 @@ game = {}
 
 function game:init()
 	self.zones = {}
-	table.insert(self.zones,CardZone:new("foeMainHand",5,5,(love.graphics.getWidth()-15)/2,(love.graphics.getHeight()-40)/7))
-	table.insert(self.zones,CardZone:new("foeResHand",10+(love.graphics.getWidth()-15)/2,5,(love.graphics.getWidth()-15)/2,(love.graphics.getHeight()-40)/7))
-	table.insert(self.zones,CardZone:new("foeConstruction",5,10+(love.graphics.getHeight()-40)/7,(love.graphics.getWidth()-15)/2,(love.graphics.getHeight()-40)/7))
-	table.insert(self.zones,CardZone:new("foeSpell",10+(love.graphics.getWidth()-15)/2,10+(love.graphics.getHeight()-40)/7,(love.graphics.getWidth()-15)/2,(love.graphics.getHeight()-40)/7))
-	table.insert(self.zones,CardZone:new("foeCreature",5,15+2*(love.graphics.getHeight()-40)/7,(love.graphics.getWidth()-10),(love.graphics.getHeight()-40)/7))
-	table.insert(self.zones,CardZone:new("youCreature",5,20+3*(love.graphics.getHeight()-40)/7,(love.graphics.getWidth()-10),(love.graphics.getHeight()-40)/7))
-	table.insert(self.zones,CardZone:new("youConstruction",5,25+4*(love.graphics.getHeight()-40)/7,(love.graphics.getWidth()-15)/2,(love.graphics.getHeight()-40)/7))
-	table.insert(self.zones,CardZone:new("youSpell",10+(love.graphics.getWidth()-15)/2,25+4*(love.graphics.getHeight()-40)/7,(love.graphics.getWidth()-15)/2,(love.graphics.getHeight()-40)/7))
-	table.insert(self.zones,CardZone:new("youResHand",5+love.graphics.getWidth()/2,30+5*(love.graphics.getHeight()-40)/7,love.graphics.getWidth()/2-10,(love.graphics.getHeight()-40)/7))
-	table.insert(self.zones,CardZone:new("youMainHand",5+love.graphics.getWidth()/2,35+6*(love.graphics.getHeight()-40)/7,love.graphics.getWidth()/2-10,(love.graphics.getHeight()-40)/7))
+	table.insert(self.zones,CardZone:new("p2MainHand",5,5,(love.graphics.getWidth()-15)/2,(love.graphics.getHeight()-40)/7))
+	table.insert(self.zones,CardZone:new("p2ResHand",10+(love.graphics.getWidth()-15)/2,5,(love.graphics.getWidth()-15)/2,(love.graphics.getHeight()-40)/7))
+	table.insert(self.zones,CardZone:new("p2Construction",5,10+(love.graphics.getHeight()-40)/7,(love.graphics.getWidth()-15)/2,(love.graphics.getHeight()-40)/7))
+	table.insert(self.zones,CardZone:new("p2Spell",10+(love.graphics.getWidth()-15)/2,10+(love.graphics.getHeight()-40)/7,(love.graphics.getWidth()-15)/2,(love.graphics.getHeight()-40)/7))
+	table.insert(self.zones,CardZone:new("p2Creature",5,15+2*(love.graphics.getHeight()-40)/7,(love.graphics.getWidth()-10),(love.graphics.getHeight()-40)/7))
+	table.insert(self.zones,CardZone:new("p1Creature",5,20+3*(love.graphics.getHeight()-40)/7,(love.graphics.getWidth()-10),(love.graphics.getHeight()-40)/7))
+	table.insert(self.zones,CardZone:new("p1Construction",5,25+4*(love.graphics.getHeight()-40)/7,(love.graphics.getWidth()-15)/2,(love.graphics.getHeight()-40)/7))
+	table.insert(self.zones,CardZone:new("p1Spell",10+(love.graphics.getWidth()-15)/2,25+4*(love.graphics.getHeight()-40)/7,(love.graphics.getWidth()-15)/2,(love.graphics.getHeight()-40)/7))
+	table.insert(self.zones,CardZone:new("p1ResHand",5+love.graphics.getWidth()/2,30+5*(love.graphics.getHeight()-40)/7,love.graphics.getWidth()/2-10,(love.graphics.getHeight()-40)/7))
+	table.insert(self.zones,CardZone:new("p1MainHand",5+love.graphics.getWidth()/2,35+6*(love.graphics.getHeight()-40)/7,love.graphics.getWidth()/2-10,(love.graphics.getHeight()-40)/7))
+	self.isFieldFlipped = false
 	
 	self.isHost = false
 	self.server = nil
@@ -36,6 +37,10 @@ function game:enter(prev, isHost, client, server)
 	self.cards = {}
 	for i, zone in ipairs(self.zones) do
 		zone:clearCards()
+	end
+	
+	if not isHost then
+		self:flipField()
 	end
 	
 	self.hoverImg = nil
@@ -174,6 +179,7 @@ function game:registerClientEvents()
 	
 	self.client:on("moveCard", function(data)
 		card = self:getCardFromID(data.card)
+		card.prevZone:removeCard(card)
 		zone = getZoneFromUID(data.zone)
 		zone:addCard(card)
 	end)
@@ -207,3 +213,79 @@ function game:registerServerEvents()
 	
 	print("finished setting up server events.")
 end
+
+function game:flipField()
+	if self.isFieldFlipped then
+		-- Restore original field.
+		for i,zone in ipairs(self.zones) do
+			if zone.name == "p2MainHand" then
+				zone.x = 5
+				zone.y = 5
+			elseif zone.name == "p2ResHand" then
+				zone.x = 10+(love.graphics.getWidth()-15)/2
+				zone.y = 5
+			elseif zone.name == "p2Construction" then
+				zone.x = 5
+				zone.y = 10+(love.graphics.getHeight()-40)/7
+			elseif zone.name == "p2Spell" then
+				zone.x = 10+(love.graphics.getWidth()-15)/2
+				zone.y = 10+(love.graphics.getHeight()-40)/7
+			elseif zone.name == "p2Creature" then
+				zone.x = 5
+				zone.y = 15+2*(love.graphics.getHeight()-40)/7
+			elseif zone.name == "p1Creature" then
+				zone.x = 5
+				zone.y = 20+3*(love.graphics.getHeight()-40)/7
+			elseif zone.name == "p1Construction" then
+				zone.x = 5
+				zone.y = 25+4*(love.graphics.getHeight()-40)/7
+			elseif zone.name == "p1Spell" then
+				zone.x = 10+(love.graphics.getWidth()-15)/2
+				zone.y = 25+4*(love.graphics.getHeight()-40)/7
+			elseif zone.name == "p1ResHand" then
+				zone.x = 5+love.graphics.getWidth()/2
+				zone.y = 30+5*(love.graphics.getHeight()-40)/7
+			elseif zone.name == "p1MainHand" then
+				zone.x = 5+love.graphics.getWidth()/2
+				zone.y = 35+6*(love.graphics.getHeight()-40)/7
+			end
+		end
+	else
+		for i,zone in ipairs(self.zones) do
+			if zone.name == "p1MainHand" then
+				zone.x = 5
+				zone.y = 5
+			elseif zone.name == "p1ResHand" then
+				zone.x = 10+(love.graphics.getWidth()-15)/2
+				zone.y = 5
+			elseif zone.name == "p1Construction" then
+				zone.x = 5
+				zone.y = 10+(love.graphics.getHeight()-40)/7
+			elseif zone.name == "p1Spell" then
+				zone.x = 10+(love.graphics.getWidth()-15)/2
+				zone.y = 10+(love.graphics.getHeight()-40)/7
+			elseif zone.name == "p1Creature" then
+				zone.x = 5
+				zone.y = 15+2*(love.graphics.getHeight()-40)/7
+			elseif zone.name == "p2Creature" then
+				zone.x = 5
+				zone.y = 20+3*(love.graphics.getHeight()-40)/7
+			elseif zone.name == "p2Construction" then
+				zone.x = 5
+				zone.y = 25+4*(love.graphics.getHeight()-40)/7
+			elseif zone.name == "p2Spell" then
+				zone.x = 10+(love.graphics.getWidth()-15)/2
+				zone.y = 25+4*(love.graphics.getHeight()-40)/7
+			elseif zone.name == "p2ResHand" then
+				zone.x = 5+love.graphics.getWidth()/2
+				zone.y = 30+5*(love.graphics.getHeight()-40)/7
+			elseif zone.name == "p2MainHand" then
+				zone.x = 5+love.graphics.getWidth()/2
+				zone.y = 35+6*(love.graphics.getHeight()-40)/7
+			end
+		end
+	end
+	
+	self.isFieldFlipped = not self.isFieldFlipped
+end
+
