@@ -9,7 +9,7 @@ function host:init()
 		f:write('Neophyte\n')
 		prevNameText = 'Neophyte'
 		f:write('127.0.0.1\n')
-		prevAddresssText = '127.0.0.1'
+		self.prevAddressText = '127.0.0.1'
 	else
 		f = love.filesystem.newFile(connectSaveFile)
 		f:open('r')
@@ -18,7 +18,7 @@ function host:init()
 			if iter == 1 then
 				prevNameText = line
 			elseif iter == 2 then
-				prevAddresssText = line
+				self.prevAddressText = line
 			end
 			iter = iter + 1
 		end
@@ -36,14 +36,14 @@ function host:init()
     self.connectButton.border = {127, 127, 127}
 
     self.connectButton.activated = function()
-        if self.nameInput.text ~= "" and self.addressInput.text ~= "" then
+        if self.nameInput.text ~= ""  then
             self:saveInputs()
-            state.switch(game, self.nameInput.text, false, self.addressInput.text)
+            self:doSwitchToGame()
         end
     end
 end
 
-function host:enter(previous)
+function host:enter(prev)
 
 end
 
@@ -54,28 +54,18 @@ function host:keypressed(key, code)
         text = text:gsub("\n", "")
         text = text:gsub("\r", "")
 
-        self.addressInput:textinput(text)
         self.nameInput:textinput(text)
-    elseif key == 'tab' then
-		if self.addressInput.selected then
-			self.addressInput.selected = false
-			self.nameInput.selected = true
-		elseif self.nameInput.selected then
-			self.nameInput.selected = false
-			self.addressInput.selected = true
-		end
 	elseif key == "escape" then
 		state.switch(menu)
 	else
-        self.addressInput:keypressed(key, code)
         self.nameInput:keypressed(key, code)
     end
 end
 
 function host:keyreleased(key, code)
-    if self.nameInput.text ~= "" and self.addressInput.text ~= "" and key == "return" then
+    if self.nameInput.text ~= "" and key == "return" then
         self:saveInputs()
-        state.switch(game, self.nameInput.text, false, self.addressInput.text)
+		self:doSwitchToGame()
     end
 
     if key == "escape" then
@@ -92,12 +82,10 @@ function host:mousereleased(x, y, button)
 end
 
 function host:textinput(text)
-    self.addressInput:textinput(text)
     self.nameInput:textinput(text)
 end
 
 function host:update(dt)
-    self.addressInput:update(dt)
     self.nameInput:update(dt)
     self.connectButton:update(dt)
 end
@@ -108,10 +96,6 @@ function host:draw()
     
     love.graphics.print("Name", self.nameInput.x, self.nameInput.y-30)
     self.nameInput:draw()
-    
-    love.graphics.setFont(fontBold[24])
-    love.graphics.print("IP Address", self.addressInput.x, self.addressInput.y-30)
-    self.addressInput:draw()
 
     self.connectButton:draw()
 	
@@ -131,6 +115,14 @@ function host:saveInputs()
     f = love.filesystem.newFile(connectSaveFile)
     f:open('w')
     f:write(self.nameInput.text..'\n')
-    f:write(self.addressInput.text..'\n')
+    f:write(self.prevAddressText..'\n')
     f:close()
+end
+
+function host:doSwitchToGame()
+	server = sock.newServer("*", 22122, 2)
+	print("Started server.")
+	client = sock.newClient("localhost",22122)
+	print("Started client on localhost")
+	state.switch(game, false, true, client, server)
 end

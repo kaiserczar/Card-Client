@@ -6,7 +6,7 @@
 -- @usage sock = require "sock"
 
 local sock = {
-    _VERSION     = 'sock.lua v0.2.0',
+    _VERSION     = 'sock.lua v0.1.0',
     _DESCRIPTION = 'A Lua networking library for LÖVE games',
     _URL         = 'https://github.com/camchenry/sock.lua',
     _LICENSE     = [[
@@ -34,11 +34,10 @@ local sock = {
     ]]
 }
 
+local currentFolder = (...):match("(.-)[^%.]+$")
 require "enet"
-
--- Try to load some common serialization libraries
--- This is for convenience, you may still specify your own serializer
-local bitserLoaded, bitser = pcall(require, "bitser")
+-- bitser is expected to be in the same directory as sock.lua
+local bitser = require(currentFolder .. "bitser")
 
 -- links variables to keys based on their order
 -- note that it only works for boolean and number values, not strings
@@ -79,7 +78,7 @@ sock.SEND_MODES = {
 }
 
 local function isValidSendMode(mode)
-    for _, validMode in ipairs(sock.SEND_MODES) do
+    for i, validMode in pairs(sock.SEND_MODES) do
         if mode == validMode then
             return true
         end
@@ -90,7 +89,7 @@ end
 local Logger = {}
 local Logger_mt = {__index = Logger}
 
-local function newLogger(source) 
+function newLogger(source) 
     local logger = setmetatable({
         source          = source,
         messages        = {},
@@ -134,7 +133,7 @@ end
 local Listener = {}
 local Listener_mt = {__index = Listener}
 
-local function newListener()
+function newListener()
     local listener = setmetatable({
         triggers        = {},                           
         formats         = {},
@@ -158,7 +157,7 @@ end
 -- Removes a callback on a given trigger
 -- Returns a boolean indicating if the callback was removed
 function Listener:removeCallback(callback)
-    for _, triggers in pairs(self.triggers) do
+    for event, triggers in pairs(self.triggers) do
         for i, trigger in pairs(triggers) do
             if trigger == callback then
                 table.remove(triggers, i)
@@ -179,7 +178,7 @@ end
 -- Returns a boolean indicating if any callbacks were triggered
 function Listener:trigger(event, data, client)
     if self.triggers[event] then
-        for _, trigger in pairs(self.triggers[event]) do
+        for i, trigger in pairs(self.triggers[event]) do
             -- Event has a pre-existing format defined
             if self.formats[event] then
                 data = zipTable(data, self.formats[event])
@@ -201,7 +200,7 @@ local Server_mt = {__index = Server}
 -- @tparam peer peer An enet peer.
 -- @treturn Client Object associated with the peer.
 function Server:getClient(peer)
-    for _, client in pairs(self.clients) do
+    for i, client in pairs(self.clients) do
         if peer == client.connection then
             return client
         end
@@ -212,7 +211,7 @@ end
 -- @tparam number connectId The unique client connection id.
 -- @treturn Client
 function Server:getClientByConnectId(connectId)
-    for _, client in pairs(self.clients) do
+    for i, client in pairs(self.clients) do
         if connectId == client.connectId then
             return client
         end
@@ -222,7 +221,7 @@ end
 --- Get the Client object that has the given peer index.
 -- @treturn Client
 function Server:getClientByIndex(index)
-    for _, client in pairs(self.clients) do
+    for i, client in pairs(self.clients) do
         if index == client:getIndex() then
             return client
         end
@@ -242,7 +241,7 @@ end
 -- @see SEND_MODES
 -- @usage
 --server:setSendMode("unreliable")
---server:sendToAll("playerState", {...})
+--server:emitToAll("playerState", {...})
 function Server:setSendMode(mode)
     if not isValidSendMode(mode) then
         self:log("warning", "Tried to use invalid send mode: '" .. mode .. "'. Defaulting to reliable.")
@@ -272,7 +271,7 @@ end
 -- @tparam number channel Channel to send data on.
 -- @usage
 --server:setSendChannel(2) -- the third channel
---server:sendToAll("importantEvent", "The message")
+--server:emit("important", "The message")
 function Server:setSendChannel(channel)
     if channel > (self.maxChannels - 1) then
         self:log("warning", "Tried to use invalid channel: " .. channel .. " (max is " .. self.maxChannels - 1 .. "). Defaulting to 0.")
@@ -297,17 +296,11 @@ end
 
 --- Check for network events and handle them.
 function Server:update()
-    if not self.deserialize then
-        self:log("error", "Can't deserialize message: deserialize was not set") 
-        error("Can't deserialize message: deserialize was not set") 
-    end
-
     local event = self.host:service(self.messageTimeout)
     
     while event do
         if event.type == "connect" then
             local eventClient = sock.newClient(event.peer)
-            eventClient:setSerialization(self.serialize, self.deserialize)
             table.insert(self.peers, event.peer)
             table.insert(self.clients, eventClient)
             self:_activateTriggers("connect", event.data, eventClient)
@@ -316,11 +309,11 @@ function Server:update()
         elseif event.type == "receive" then
             local message = self.deserialize(event.data)
             local eventClient = self:getClient(event.peer)
-            local eventName = message[1]
+            local event = message[1]
             local data = message[2]
 
-            self:_activateTriggers(eventName, data, eventClient)
-            self:log(eventName, data)
+            self:_activateTriggers(event, data, eventClient)
+            self:log(event, data)
 
         elseif event.type == "disconnect" then
             -- remove from the active peer list
@@ -340,7 +333,7 @@ function Server:update()
         
         end
 
-        event = self.host:service(self.messageTimeout)
+        event = self.host:service()
     end
 end
 
@@ -351,14 +344,9 @@ end
 -- @tparam Client client The client to not receive the message.
 -- @tparam string event The event to trigger with this message. 
 -- @param data The data to send.
-function Server:sendToAllBut(client, event, data)
+function Server:emitToAllBut(client, event, data)
     local message = {event, data}
-    local serializedMessage
-    
-    if not self.serialize then
-        self:log("error", "Can't serialize message: serialize was not set") 
-        error("Can't serialize message: serialize was not set") 
-    end
+    local serializedMessage = nil
 
     -- 'Data' = binary data class in Love
     if type(data) == "userdata" and data.type and data:typeOf("Data") then
@@ -368,7 +356,7 @@ function Server:sendToAllBut(client, event, data)
         serializedMessage = self.serialize(message)
     end
 
-    for _, p in pairs(self.peers) do
+    for i, p in pairs(self.peers) do
         if p ~= client.connection then
             self.packetsSent = self.packetsSent + 1
             p:send(serializedMessage, self.sendChannel, self.sendMode)
@@ -382,15 +370,10 @@ end
 -- @tparam string event The event to trigger with this message.
 -- @param data The data to send.
 --@usage
---server:sendToAll("gameStarting", true)
-function Server:sendToAll(event, data)
+--server:emitToAll("gameStarting", true)
+function Server:emitToAll(event, data)
     local message = {event, data}
-    local serializedMessage
-    
-    if not self.serialize then
-        self:log("error", "Can't serialize message: serialize was not set") 
-        error("Can't serialize message: serialize was not set") 
-    end
+    local serializedMessage = nil
 
     -- 'Data' = binary data class in Love
     if type(data) == "userdata" and data.type and data:typeOf("Data") then
@@ -404,28 +387,6 @@ function Server:sendToAll(event, data)
 
     self.host:broadcast(serializedMessage, self.sendChannel, self.sendMode)
 
-    self:resetSendSettings()
-end
-
---- Send a message to a single peer. Useful to send data to a newly connected player
--- without sending to everyone who already received it.
--- @tparam enet_peer peer The enet peer to receive the message.
--- @tparam string event The event to trigger with this message. 
--- @param data data to send to the peer.
---@usage
---server:sendToPeer(peer, "initialGameInfo", {...})
-function Server:sendToPeer(peer, event, data)
-    local message = {event, data}
-    local serializedMessage
-    if type(data) == "userdata" and data.type and data:typeOf("Data") then
-        message[2] = data:getString()
-        serializedMessage = self.serialize(message)
-    else
-        serializedMessage = self.serialize(message)
-    end
-    
-    self.packetsSent = self.packetsSent + 1
-    peer:send(serializedMessage, self.sendChannel, self.sendMode)
     self:resetSendSettings()
 end
 
@@ -596,14 +557,6 @@ function Server:getClients()
     return self.clients
 end
 
---- Set the serialization functions for sending and receiving data.
--- Both the client and server must share the same serialization method.
--- @tparam function serialize The serialization function to use.
--- @tparam function deserialize The deserialization function to use.
--- @usage
---bitser = require "bitser" -- or any library you like
---server = sock.newServer("localhost", 22122)
---server:setSerialization(bitser.dumps, bitser.loads)
 function Server:setSerialization(serialize, deserialize)
     assert(type(serialize) == "function", "Serialize must be a function, got: '"..type(serialize).."'")
     assert(type(deserialize) == "function", "Deserialize must be a function, got: '"..type(deserialize).."'")
@@ -624,7 +577,7 @@ local Client_mt = {__index = Client}
 -- @see SEND_MODES
 -- @usage
 --client:setSendMode("unreliable")
---client:send("position", {...})
+--client:emit("position", {...})
 function Client:setSendMode(mode)
     if not isValidSendMode(mode) then
         self:log("warning", "Tried to use invalid send mode: '" .. mode .. "'. Defaulting to reliable.")
@@ -654,7 +607,7 @@ end
 -- @tparam number channel Channel to send data on.
 -- @usage
 --client:setSendChannel(2) -- the third channel
---client:send("important", "The message")
+--client:emit("important", "The message")
 function Client:setSendChannel(channel)
     if channel > (self.maxChannels - 1) then
         self:log("warning", "Tried to use invalid channel: " .. channel .. " (max is " .. self.maxChannels - 1 .. "). Defaulting to 0.")
@@ -678,11 +631,14 @@ function Client:resetSendSettings()
 end
 
 --- Connect to the chosen server.
--- Connection will not actually occur until the next time `Client:update` is called.
+-- @treturn boolean Status indicating whether or not the connection was successful.
+-- @todo Actually return the status.
 function Client:connect()
     -- number of channels for the client and server must match
     self.connection = self.host:connect(self.address .. ":" .. self.port, self.maxChannels)
     self.connectId = self.connection:connect_id()
+
+    return true
 end
 
 --- Disconnect from the server, if connected. The client will disconnect the 
@@ -713,11 +669,6 @@ end
 
 --- Check for network events and handle them.
 function Client:update()
-    if not self.deserialize then
-        self:log("error", "Can't deserialize message: deserialize was not set") 
-        error("Can't deserialize message: deserialize was not set") 
-    end
-
     local event = self.host:service(self.messageTimeout)
     
     while event do
@@ -726,32 +677,27 @@ function Client:update()
             self:log(event.type, "Connected to " .. tostring(self.connection))
         elseif event.type == "receive" then
             local message = self.deserialize(event.data)
-            local eventName = message[1]
+            local event = message[1]
             local data = message[2]
 
-            self:_activateTriggers(eventName, data)
-            self:log(eventName, data)
+            self:_activateTriggers(event, data)
+            self:log(event, data)
 
         elseif event.type == "disconnect" then
             self:_activateTriggers("disconnect", event.data)
             self:log(event.type, "Disconnected from " .. tostring(self.connection))
         end
 
-        event = self.host:service(self.messageTimeout)
+        event = self.host:service()
     end
 end
 
 --- Send a message to the server.
 -- @tparam string event The event to trigger with this message.
 -- @param data The data to send.
-function Client:send(event, data)
+function Client:emit(event, data)
     local message = {event, data}
-    local serializedMessage
-
-    if not self.serialize then
-        self:log("error", "Can't serialize message: serialize was not set") 
-        error("Can't serialize message: serialize was not set") 
-    end
+    local serializedMessage = nil
 
     -- 'Data' = binary data class in Love
     if type(data) == "userdata" and data.type and data:typeOf("Data") then
@@ -788,7 +734,7 @@ function Client:setDataFormat(event, format)
 end
 
 function Client:_activateTriggers(event, data)
-    local result = self.listener:trigger(event, data)
+    local result = self.listener:trigger(event, data, client)
 
     self.packetsReceived = self.packetsReceived + 1
 
@@ -999,14 +945,6 @@ function Client:getPort()
     return self.port
 end
 
---- Set the serialization functions for sending and receiving data.
--- Both the client and server must share the same serialization method.
--- @tparam function serialize The serialization function to use.
--- @tparam function deserialize The deserialization function to use.
--- @usage
---bitser = require "bitser" -- or any library you like
---client = sock.newClient("localhost", 22122)
---client:setSerialization(bitser.dumps, bitser.loads)
 function Client:setSerialization(serialize, deserialize)
     assert(type(serialize) == "function", "Serialize must be a function, got: '"..type(serialize).."'")
     assert(type(deserialize) == "function", "Deserialize must be a function, got: '"..type(deserialize).."'")
@@ -1070,7 +1008,6 @@ sock.newServer = function(address, port, maxPeers, maxChannels, inBandwidth, out
 
         listener        = newListener(),
         logger          = newLogger("SERVER"),
-
         serialize       = nil,
         deserialize     = nil,
 
@@ -1088,9 +1025,15 @@ sock.newServer = function(address, port, maxPeers, maxChannels, inBandwidth, out
 
     server:setBandwidthLimit(inBandwidth, outBandwidth)
 
-    if bitserLoaded then
-        server:setSerialization(bitser.dumps, bitser.loads)
+    local serialize = function(msg)
+        return bitser.dumps(msg) 
     end
+
+    local deserialize = function(data)
+        return bitser.loads(data)
+    end
+
+    server:setSerialization(serialize, deserialize)
 
     return server
 end
@@ -1137,9 +1080,6 @@ sock.newClient = function(serverOrAddress, port, maxChannels)
         listener        = newListener(),
         logger          = newLogger("CLIENT"),
 
-        serialize       = nil,
-        deserialize     = nil,
-
         packetsReceived = 0,
         packetsSent     = 0,
     }, Client_mt)
@@ -1162,9 +1102,15 @@ sock.newClient = function(serverOrAddress, port, maxChannels)
         client.connectId = client.connection:connect_id()
     end
 
-    if bitserLoaded then
-        client:setSerialization(bitser.dumps, bitser.loads)
+    local serialize = function(msg)
+        return bitser.dumps(msg) 
     end
+
+    local deserialize = function(data)
+        return bitser.loads(data)
+    end
+
+    client:setSerialization(serialize, deserialize)
 
     return client
 end

@@ -37,7 +37,10 @@ function CardZone:draw()
     local y = self.height/2 - love.graphics.getFont():getHeight(self.name)/2
     love.graphics.print(self.name, x+self.x, y+self.y)
 	
+    love.graphics.setColor(255, 0, 0)
 	love.graphics.line(self.x, self.y, self.x+self.width, self.y, self.x+self.width, self.y+self.height, self.x, self.y+self.height, self.x, self.y)
+	
+	love.graphics.setColor(255,255,255)
 	for i, card in ipairs(self.cards) do
 		card:draw()
 	end
@@ -132,6 +135,14 @@ end
 
 function CardZone:isInZone(x, y)
 	return x >= self.x and x <= self.x+self.width and y >= self.y and y <= self.y+self.height
+end
+
+function CardZone:clearCards()
+	self.cards = {}
+	self.numCards = 0
+	self.isTwoRows = false
+	
+	self:balanceCards()
 end
 
 function getCardZone(card)

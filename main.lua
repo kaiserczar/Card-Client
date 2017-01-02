@@ -6,6 +6,7 @@ serialize = require 'lib.ser'
 signal = require 'lib.signal'
 sock = require 'lib.sock'
 require 'lib.util'
+require 'lib.bitser'
 
 
 -- gamestates
@@ -81,7 +82,7 @@ function love.load()
 end
 
 function love.keypressed(key, code)
-    
+
 end
 
 function love.mousepressed(x, y, mbutton)

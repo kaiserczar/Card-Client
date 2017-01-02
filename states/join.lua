@@ -44,12 +44,12 @@ function join:init()
     self.connectButton.activated = function()
         if self.nameInput.text ~= "" and self.addressInput.text ~= "" then
             self:saveInputs()
-            state.switch(game, self.nameInput.text, false, self.addressInput.text)
+			self:doSwitchToGame()
         end
     end
 end
 
-function join:enter(previous)
+function join:enter(prev)
 
 end
 
@@ -83,7 +83,7 @@ function join:keyreleased(key, code)
     if self.nameInput.text ~= "" and self.addressInput.text ~= "" and key == "return" then
         self:saveInputs()
 		-- DO CONNECTION HERE
-        state.switch(game)
+        self:doSwitchToGame()
     end
 
     if key == "escape" then
@@ -142,4 +142,10 @@ function join:saveInputs()
     f:write(self.nameInput.text..'\n')
     f:write(self.addressInput.text..'\n')
     f:close()
+end
+
+function join:doSwitchToGame()
+	client = sock.newClient(self.addressInput.text,22122)
+	print("Sent connection request to ".. self.addressInput.text)
+	state.switch(game, false, false, client, nil)
 end

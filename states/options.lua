@@ -34,7 +34,7 @@ function options:alwaysUsableAdd(obj)
 	return obj
 end
 
-function options:enter()
+function options:enter(prev)
 	self.currentPanel = 1
 
 	local config = nil

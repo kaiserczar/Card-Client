@@ -2,6 +2,13 @@ menu = {}
 
 menu.items = {
     {
+        title = "SINGLE PLAYER",
+        action = function()
+            state.switch(game, true, false, nil, nil)
+        end,
+		fontSize = 38,
+    },
+	{
         title = "JOIN GAME",
         action = function()
             state.switch(join)
@@ -66,8 +73,8 @@ function menu:init()
 	
 end
 
-function menu:enter()
-
+function menu:enter(prev)
+	
 end
 
 function menu:update(dt)
