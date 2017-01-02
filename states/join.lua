@@ -148,5 +148,5 @@ function join:doSwitchToGame()
 	client = sock.newClient(self.addressInput.text,22122)
 	client:setSerialization(bitser.dumps, bitser.loads)
 	print("Sent connection request to ".. self.addressInput.text)
-	state.switch(game, false, false, client, nil)
+	state.switch(game, false, client, nil)
 end

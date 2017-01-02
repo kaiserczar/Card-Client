@@ -16,30 +16,22 @@ function game:init()
 	table.insert(self.zones,CardZone:new("youResHand",5+love.graphics.getWidth()/2,30+5*(love.graphics.getHeight()-40)/7,love.graphics.getWidth()/2-10,(love.graphics.getHeight()-40)/7))
 	table.insert(self.zones,CardZone:new("youMainHand",5+love.graphics.getWidth()/2,35+6*(love.graphics.getHeight()-40)/7,love.graphics.getWidth()/2-10,(love.graphics.getHeight()-40)/7))
 	
-	self.isSingle = true
 	self.isHost = false
 	self.server = nil
 	self.client = nil
 end
 
-function game:enter(prev, isSingle, isHost, client, server)
+function game:enter(prev, isHost, client, server)
 	
-	self.isSingle = isSingle
-	if self.isSingle then
-		self.isHost = false
-		self.client = nil
-		self.server = nil
+	self.isHost = isHost
+	if self.isHost then
+		self.server = server
+		self:registerServerEvents()
 	else
-		self.isHost = isHost
-		if self.isHost then
-			self.server = server
-			self:registerServerEvents()
-		else
-			self.server = nil
-		end
-		self.client = client
-		self:registerClientEvents()
+		self.server = nil
 	end
+	self.client = client
+	self:registerClientEvents()
 	
 	self.cards = {}
 	for i, zone in ipairs(self.zones) do
@@ -59,14 +51,10 @@ function game:update(dt)
 		zone:update(dt)
 	end
 	
-	print("Singleplayer: "..tostring(self.isSingle))
-	if not self.isSingle then
-		print("Hosting: "..tostring(self.isHost))
-		if self.isHost then
-			self.server:update()
-		end
-		self.client:update()
+	if self.isHost then
+		self.server:update()
 	end
+	self.client:update()
 end
 
 function game:keypressed(key, code)
@@ -158,6 +146,7 @@ function game:getCardFromID(uid)
 end
 
 function game:registerClientEvents()
+	print("setting up client events")
 	self.client:on("connect",function(data)
 		print("Successfully connected to server!")
 	end)
@@ -166,25 +155,40 @@ function game:registerClientEvents()
 	end)
 	
 	self.client:on("newCard",function(data)
-		newCard = data.card
-		newCardZoneID = data.zoneID
+		if data.imgNum==1 then
+			newCard = Card:new(self,"placeholder",love.graphics.newImage('assets/img/card1.jpg'),1,data.x,data.y,0.5,0.75,false,100,100)
+		elseif data.imgNum==2 then
+			newCard = Card:new(self,"placeholder",love.graphics.newImage('assets/img/card2.jpg'),2,data.x,data.y,0.5,0.75,false,100,100)
+		elseif data.imgNum==3 then
+			newCard = Card:new(self,"placeholder",love.graphics.newImage('assets/img/card3.jpg'),3,data.x,data.y,0.5,0.75,false,100,100)
+		else
+			newCard = Card:new(self,"placeholder",love.graphics.newImage('assets/img/card4.jpg'),4,data.x,data.y,0.5,0.75,false,100,100)
+		end
+		newCard.name = "card"..tostring(newCard.UID)
+		
 		table.insert(self.cards,newCard)
-		getZoneFromID(newCardZoneID):addCard(newCard)
+		print(data.zoneID)
+		print(newCard)
+		getZoneFromUID(data.zoneID):addCard(newCard)
 	end)
 	
 	self.client:on("moveCard", function(data)
-		card = self.getCardFromID(data.card)
-		zone = getZoneFromID(data.zone)
-		zone.addCard(card)
+		card = self:getCardFromID(data.card)
+		zone = getZoneFromUID(data.zone)
+		zone:addCard(card)
 	end)
+	print("finished setting up client events")
+	
+	self.client:connect()
 end
 
 function game:registerServerEvents()
+	print("setting up server events")
 	self.server:on("connect", function(data,client)
 		print("Got a new connection from client "..tostring(client:getIndex()))
 		-- Update the new client with current cards.
 		for i,card in ipairs(self.cards) do
-			client:emit("newCard", card)
+			client:send("newCard", {zoneID = card.zone.UID,imgNum = card.imgNum, x=0,y=0})
 		end
 	end)
 	
@@ -194,20 +198,12 @@ function game:registerServerEvents()
 	
 	self.server:on("newCard", function(data,client)
 		whichPic = math.random(4)
-		if whichPic==1 then
-			newCard = Card:new(self,"placeholder",love.graphics.newImage('assets/img/card1.jpg'),data.x,data.y,0.5,0.75,false,100,100)
-		elseif whichPic==2 then
-			newCard = Card:new(self,"placeholder",love.graphics.newImage('assets/img/card2.jpg'),data.x,data.y,0.5,0.75,false,100,100)
-		elseif whichPic==3 then
-			newCard = Card:new(self,"placeholder",love.graphics.newImage('assets/img/card3.jpg'),data.x,data.y,0.5,0.75,false,100,100)
-		else
-			newCard = Card:new(self,"placeholder",love.graphics.newImage('assets/img/card4.jpg'),data.x,data.y,0.5,0.75,false,100,100)
-		end
-		newCard.name = "card"..tostring(newCard.UID)
-		self.server:emitToAll("newCard",{card = newCard, zoneID = 6})
+		self.server:sendToAll("newCard",{zoneID = 6,imgNum = whichPic,x=data.x,y=data.y})
 	end)
 	
 	self.server:on("moveCard", function(data,client)
-		self.server:emitToAll("moveCard",data)
+		self.server:sendToAll("moveCard",data)
 	end)
+	
+	print("finished setting up server events.")
 end

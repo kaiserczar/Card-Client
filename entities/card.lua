@@ -1,7 +1,7 @@
 Card = class("Card")
 Card.sessionUID = 1
 
-function Card:initialize(game, name, img, origX, origY, normalScale, hoverScale, isDefense, origAtk, origHealth, doesHover)
+function Card:initialize(game, name, img, imgNum, origX, origY, normalScale, hoverScale, isDefense, origAtk, origHealth, doesHover)
 
 	self.game = game
 

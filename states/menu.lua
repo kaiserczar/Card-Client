@@ -1,13 +1,6 @@
 menu = {}
 
 menu.items = {
-    {
-        title = "SINGLE PLAYER",
-        action = function()
-            state.switch(game, true, false, nil, nil)
-        end,
-		fontSize = 38,
-    },
 	{
         title = "JOIN GAME",
         action = function()

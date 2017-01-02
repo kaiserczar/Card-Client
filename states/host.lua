@@ -126,5 +126,5 @@ function host:doSwitchToGame()
 	client = sock.newClient("localhost",22122)
 	client:setSerialization(bitser.dumps, bitser.loads)
 	print("Started client on localhost")
-	state.switch(game, false, true, client, server)
+	state.switch(game, true, client, server)
 end
