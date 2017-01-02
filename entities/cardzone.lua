@@ -51,7 +51,7 @@ function CardZone:addCard(card)
 	self.numCards = self.numCards + 1
 	card:setZone(getZoneFromUID(self.UID))
 	self:balanceCards()
-	print("Zone " .. tostring(self.UID) .. " has added card " .. card.name)
+	--print("Zone " .. tostring(self.UID) .. " has added card " .. card.name)
 end
 
 function CardZone:removeCard(card)
@@ -61,7 +61,7 @@ function CardZone:removeCard(card)
 			self.numCards = self.numCards - 1
 			card:setZone(nil)
 			self:balanceCards()
-			print("Zone " .. tostring(self.UID) .. " has removed card " .. card.name)
+			--print("Zone " .. tostring(self.UID) .. " has removed card " .. card.name)
 		end
 	end
 	
@@ -81,7 +81,7 @@ function CardZone:balanceCards()
 	if self.numCards == 0 then
 		return nil
 	end
-	print("Max card height is: " .. tostring(maxHeight) .. " Zone total height is: " .. tostring(self.height))
+	--print("Max card height is: " .. tostring(maxHeight) .. " Zone total height is: " .. tostring(self.height))
 	if maxHeight <= self.height/2 then
 	-- Two rows of cards
 		maxWidth = 0

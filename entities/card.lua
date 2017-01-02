@@ -124,11 +124,11 @@ function Card:setZone(zone)
 	self.zone = zone
 	if zone ~= nil then
 		self.doReturnToOriginalPosition = true
-		print("Card " .. tostring(self.UID) .. " moved to zone " .. tostring(zone.UID))
+		--print("Card " .. tostring(self.UID) .. " moved to zone " .. tostring(zone.UID))
 		self.prevZone = zone
 	else
 		self.doReturnToOriginalPosition = false
-		print("Card " .. tostring(self.UID) .. " moved to zone nil.")
+		--print("Card " .. tostring(self.UID) .. " moved to zone nil.")
 		self.normalScale = self.origNormalScale
 		self.hoverScale = self.origHoverScale
 	end
