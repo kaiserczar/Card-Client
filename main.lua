@@ -20,6 +20,7 @@ require 'states.host'
 require 'entities.sound'
 require 'entities.card'
 require 'entities.cardzone'
+require 'entities.cardlist'
 
 -- ui
 require 'lib.ui.button'
