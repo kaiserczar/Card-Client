@@ -2,7 +2,7 @@ CardZone = class("CardZone")
 CardZone.sessionUID = 1
 CardZone.zones = {}
 
-function CardZone:initialize(name, locX, locY, spanX, spanY)
+function CardZone:initialize(name, locX, locY, spanX, spanY, showTitle, showBorder)
 	self.name = name
 	self.x = locX
 	self.y = locY
@@ -12,6 +12,8 @@ function CardZone:initialize(name, locX, locY, spanX, spanY)
 	self.numCards = 0
 	self.spacing = 10
 	self.isTwoRows = false
+	self.showTitle = showTitle or true
+	self.showBorder = showBorder or true
 	
 	self.UID = CardZone.sessionUID
 	CardZone.sessionUID = CardZone.sessionUID + 1
@@ -32,13 +34,17 @@ end
 function CardZone:draw()
     love.graphics.setColor(255, 255, 255)
 	
-    love.graphics.setFont(font[24])
-    local x = self.width/2 - love.graphics.getFont():getWidth(self.name)/2
-    local y = self.height/2 - love.graphics.getFont():getHeight(self.name)/2
-    love.graphics.print(self.name, x+self.x, y+self.y)
+	if self.showTitle then
+		love.graphics.setFont(font[24])
+		local x = self.width/2 - love.graphics.getFont():getWidth(self.name)/2
+		local y = self.height/2 - love.graphics.getFont():getHeight(self.name)/2
+		love.graphics.print(self.name, x+self.x, y+self.y)
+	end
 	
-    love.graphics.setColor(255, 0, 0)
-	love.graphics.line(self.x, self.y, self.x+self.width, self.y, self.x+self.width, self.y+self.height, self.x, self.y+self.height, self.x, self.y)
+	if self.showBorder then
+		love.graphics.setColor(255, 0, 0)
+		love.graphics.line(self.x, self.y, self.x+self.width, self.y, self.x+self.width, self.y+self.height, self.x, self.y+self.height, self.x, self.y)
+	end
 	
 	love.graphics.setColor(255,255,255)
 	for i, card in ipairs(self.cards) do

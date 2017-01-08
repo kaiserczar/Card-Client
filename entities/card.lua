@@ -24,6 +24,7 @@ function Card:initialize(game, name, img, imgNum, origX, origY, normalScale, hov
 	self.origHealth = origHealth
 	self.curAtk = origAtk
 	self.curHealth = origHealth
+	self.cardID = 0
 
 	--UI Control
 	self.isDragging = false
