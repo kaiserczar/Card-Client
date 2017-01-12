@@ -7,6 +7,7 @@ signal = require 'lib.signal'
 sock = require 'lib.sock'
 require 'lib.util'
 bitser = require 'lib.bitser'
+require 'lib.tablesave'
 
 
 -- gamestates
@@ -15,12 +16,18 @@ require 'states.game'
 require 'states.options'
 require 'states.join'
 require 'states.host'
+require 'states.admin'
 
 -- entities
 require 'entities.sound'
 require 'entities.card'
 require 'entities.cardzone'
 require 'entities.cardlist'
+require 'entities.displaycard'
+require 'entities.creaturecard'
+require 'entities.constructioncard'
+require 'entities.resourcecard'
+require 'entities.spellcard'
 
 -- ui
 require 'lib.ui.button'

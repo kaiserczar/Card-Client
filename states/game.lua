@@ -72,6 +72,10 @@ function game:keypressed(key, code)
 				print("Card "..tostring(card.UID).." is in zone "..tostring(zone.UID))
 			end
 		end
+	elseif key == "p" then
+		for i, card in ipairs(self.cards) do
+			card:getDebug()
+		end
 	elseif key == "a" then
 		client:send("newCard",{x=love.mouse.getX(),y=love.mouse.getY()})
 	elseif key == "escape" then
@@ -161,13 +165,13 @@ function game:registerClientEvents()
 	
 	self.client:on("newCard",function(data)
 		if data.imgNum==1 then
-			newCard = Card:new(self,"placeholder",love.graphics.newImage('assets/img/card1.jpg'),1,data.x,data.y,0.5,0.75,false,100,100)
+			newCard = DisplayCard:new(self,"placeholder",love.graphics.newImage('assets/img/card1.jpg'),1,data.x,data.y,0.5,0.75,false,100,100)
 		elseif data.imgNum==2 then
-			newCard = Card:new(self,"placeholder",love.graphics.newImage('assets/img/card2.jpg'),2,data.x,data.y,0.5,0.75,false,100,100)
+			newCard = DisplayCard:new(self,"placeholder",love.graphics.newImage('assets/img/card2.jpg'),2,data.x,data.y,0.5,0.75,false,100,100)
 		elseif data.imgNum==3 then
-			newCard = Card:new(self,"placeholder",love.graphics.newImage('assets/img/card3.jpg'),3,data.x,data.y,0.5,0.75,false,100,100)
+			newCard = DisplayCard:new(self,"placeholder",love.graphics.newImage('assets/img/card3.jpg'),3,data.x,data.y,0.5,0.75,false,100,100)
 		else
-			newCard = Card:new(self,"placeholder",love.graphics.newImage('assets/img/card4.jpg'),4,data.x,data.y,0.5,0.75,false,100,100)
+			newCard = DisplayCard:new(self,"placeholder",love.graphics.newImage('assets/img/card4.jpg'),4,data.x,data.y,0.5,0.75,false,100,100)
 		end
 		newCard.name = "card"..tostring(newCard.UID)
 		

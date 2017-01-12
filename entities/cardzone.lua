@@ -67,7 +67,7 @@ function CardZone:removeCard(card)
 			self.numCards = self.numCards - 1
 			card:setZone(nil)
 			self:balanceCards()
-			--print("Zone " .. tostring(self.UID) .. " has removed card " .. card.name)
+			break
 		end
 	end
 	
