@@ -1,15 +1,14 @@
 ConstructionCard = class("ConstructionCard", Card)
 
-function ConstructionCard:initialize(game, cardID, name, text, isToken, health, attributes, sv, attack, resourceCost)
+function ConstructionCard:initialize(game, cardID, name, text, isToken, health, attributes, sv, attack, resourceCost, isShiny)
 
-	Card.initialize(self, game, cardID, name, text, "Construction", isToken)
+	Card.initialize(self, game, cardID, name, text, "Construction", isToken, attributes, isShiny)
 	
 	-- Construction info
 	self.origAtk = attack or 0
 	self.curAtk = attack or 0
 	self.origHp = health
 	self.curHp = health
-	self.attributes = attributes
 	self.sv = sv
 	self.resourceCost = resourceCost
 

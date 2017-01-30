@@ -144,6 +144,11 @@ self.hoverImg = img
 self.hoverImgScale = (love.graphics.getHeight() - (30+5*(love.graphics.getHeight()-40)/7)) / img:getHeight()
 
 end
+function game:setHoverCard(card)
+  self.hoverCard = card
+  self.hoverImg = card.img
+  self.hoverImgScale = (love.graphics.getHeight() - (30+5*(love.graphics.getHeight()-40)/7)) / self.hoverImg:getHeight()
+end
 
 function game:getCardFromID(uid)
 	for i,card in ipairs(self.cards) do
@@ -164,16 +169,25 @@ function game:registerClientEvents()
 	end)
 	
 	self.client:on("newCard",function(data)
-		if data.imgNum==1 then
-			newCard = DisplayCard:new(self,"placeholder",love.graphics.newImage('assets/img/card1.jpg'),1,data.x,data.y,0.5,0.75,false,100,100)
-		elseif data.imgNum==2 then
-			newCard = DisplayCard:new(self,"placeholder",love.graphics.newImage('assets/img/card2.jpg'),2,data.x,data.y,0.5,0.75,false,100,100)
-		elseif data.imgNum==3 then
-			newCard = DisplayCard:new(self,"placeholder",love.graphics.newImage('assets/img/card3.jpg'),3,data.x,data.y,0.5,0.75,false,100,100)
-		else
-			newCard = DisplayCard:new(self,"placeholder",love.graphics.newImage('assets/img/card4.jpg'),4,data.x,data.y,0.5,0.75,false,100,100)
-		end
-		newCard.name = "card"..tostring(newCard.UID)
+    if DEBUG then
+      print("Spawning new card; client-side event starts here.")
+      print("     Size of cardListAlpha: "..tostring(#(cardListAlpha.cardList)))
+      for i, card in ipairs(cardListAlpha.cardList) do
+        print("     Card #"..tostring(i).." id is: "..tostring(card.card.cardID))
+      end
+    end
+    
+      --(game, card, origX, origY, normalScale, hoverScale, isDefense, doesHover)
+    newCard = DisplayCard:new(self,cardListAlpha.cardList[data.imgNum].card,data.x,data.y,0.5,0.75,false,false)
+--		if data.imgNum==1 then
+--			newCard = DisplayCard:new(self,"placeholder",love.graphics.newImage('assets/img/card1.jpg'),1,data.x,data.y,0.5,0.75,false,100,100)
+--		elseif data.imgNum==2 then
+--			newCard = DisplayCard:new(self,"placeholder",love.graphics.newImage('assets/img/card2.jpg'),2,data.x,data.y,0.5,0.75,false,100,100)
+--		elseif data.imgNum==3 then
+--			newCard = DisplayCard:new(self,"placeholder",love.graphics.newImage('assets/img/card3.jpg'),3,data.x,data.y,0.5,0.75,false,100,100)
+--		else
+--			newCard = DisplayCard:new(self,"placeholder",love.graphics.newImage('assets/img/card4.jpg'),4,data.x,data.y,0.5,0.75,false,100,100)
+--		end
 		
 		table.insert(self.cards,newCard)
 		print(data.zoneID)

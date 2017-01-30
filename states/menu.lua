@@ -18,7 +18,7 @@ menu.items = {
 	{
         title = "ADMIN",
         action = function()
-            state.switch(admin)
+            state.switch(adminPassword)
         end,
 		fontSize = 30,
     },

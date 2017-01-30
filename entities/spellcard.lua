@@ -1,11 +1,10 @@
 SpellCard = class("SpellCard", Card)
 
-function SpellCard:initialize(game, cardID, name, text, isToken, attributes, spCost, isReactionary)
+function SpellCard:initialize(game, cardID, name, text, isToken, attributes, spCost, isReactionary, isShiny)
 
-	Card.initialize(self, game, cardID, name, text, "Spell", isToken)
+	Card.initialize(self, game, cardID, name, text, "Spell", isToken, attributes, isShiny)
 	
 	-- Spell info
-	self.attributes = attributes
 	self.spCost = spCost
 	self.isReactionary = isReactionary or false
 

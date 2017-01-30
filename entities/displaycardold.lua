@@ -1,7 +1,7 @@
 DisplayCard = class("DisplayCard")
 DisplayCard.sessionUID = 1
 
-function DisplayCard:initialize(game, card, origX, origY, normalScale, hoverScale, isDefense, doesHover)
+function DisplayCard:initialize(game, name, img, imgNum, origX, origY, normalScale, hoverScale, isDefense, origAtk, origHealth, doesHover)
 
 	self.game = game
 
@@ -17,9 +17,15 @@ function DisplayCard:initialize(game, card, origX, origY, normalScale, hoverScal
 	self.doesHover = doesHover or false
 
 	--Card Information
-  self.card = card
-	self.img = love.graphics.newImage('assets/img/card'..card.cardID..'.jpg')
+	self.img = img or love.graphics.newImage('assets/img/card.png')
+	self.imgNum = imgNum
+	self.name = name or "blankCard"
 	self.isDefense = isDefense or false
+	self.origAtk = origAtk
+	self.origHealth = origHealth
+	self.curAtk = origAtk
+	self.curHealth = origHealth
+	self.cardID = 0
 
 	--UI Control
 	self.isDragging = false
@@ -46,7 +52,7 @@ function DisplayCard:update(dt)
 
 	if self:isMouseOver(love.mouse.getX(),love.mouse.getY()) then
 		if not self.wasMouseOver then
-			self.game:setHoverCard(self)
+			self.game:setHoverImage(self.img)
 			self.wasMouseOver = true
 		end
 	else

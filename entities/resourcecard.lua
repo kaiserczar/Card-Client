@@ -1,11 +1,10 @@
 ResourceCard = class("ResourceCard", Card)
 
-function ResourceCard:initialize(game, cardID, name, text, isToken, attributes)
+function ResourceCard:initialize(game, cardID, name, text, isToken, attributes, isShiny)
 
-	Card.initialize(self, game, cardID, name, text, "Resource", isToken)
+	Card.initialize(self, game, cardID, name, text, "Resource", isToken, attributes, isShiny)
 	
 	-- Resource info
-	self.attributes = attributes
 
 end
 

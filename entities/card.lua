@@ -1,16 +1,17 @@
 Card = class("Card")
-Card.cardTypes = {"Creature", "Construction", "Resource", "Spell"}
 
-function Card:initialize(game, cardID, name, text, cardType, isToken)
-
+function Card:initialize(game, cardID, name, text, cardType, isToken, attributes, isShiny)
+  if DEBUG then print("New card, id: "..cardID) end
 	self.game = game
 
 	--Card Information
 	self.type = cardType
 	self.name = name
-	self.cardID = 0
+	self.cardID = cardID
 	self.text = text
 	self.isToken = isToken or false
+	self.attributes = attributes or {}
+  self.isShiny = isShiny
 
 end
 
