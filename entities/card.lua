@@ -11,7 +11,7 @@ function Card:initialize(game, cardID, name, text, cardType, isToken, attributes
 	self.text = text
 	self.isToken = isToken or false
 	self.attributes = attributes or {}
-  self.isShiny = isShiny
+  self.isShiny = isShiny or false
 
 end
 

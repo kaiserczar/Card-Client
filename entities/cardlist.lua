@@ -7,12 +7,17 @@ function CardList:initialize(name, formerCardList)
 	self.cardList = {}
 	self.numCards = 0
 	
+  if DEBUG then print('Creating new CardList "'..self.name..'."') end
+  if DEBUG then print('     Checking if it is built on a different list.') end
+  
 	if formerCardList then
 		for i, card in ipairs(formerCardList) do
-			self:addCard(card)
+			self:addCard(card.card,true)
 		end
 	end
-	
+  
+  if DEBUG then print('     Finished creating new CardList.') end
+  
 end
 
 function CardList:addCard(card,inOrder)
@@ -23,6 +28,15 @@ function CardList:addCard(card,inOrder)
   end
   --self.cardList[tostring(card.cardID)]={card=card, shuffle=math.random()}
 	self.numCards = self.numCards + 1
+  if DEBUG then
+    local cardname
+    if card.name then
+      cardname = card.name
+    else -- Account for DisplayCard lists just in case.
+      cardname = card.card.name
+    end
+    print('Added card "'..cardname..'" to CardList "'..self.name..'."') 
+  end
 end
 
 function CardList:removeCard(card)
@@ -31,6 +45,15 @@ function CardList:removeCard(card)
 		if cardi.card.cardID == card.cardID then
 			table.remove(self.cards,i)
 			self.numCards = self.numCards - 1
+      if DEBUG then
+        local cardname
+        if cardi.card.name then
+          cardname = cardi.card.name
+        else -- Account for DisplayCard lists just in case.
+          cardname = cardi.card.card.name
+        end
+        print('Removed card "'..cardname..'" from CardList "'..self.name..'."') 
+      end
 			break
 		end
 	end
@@ -53,6 +76,7 @@ function CardList:shuffle()
 		self.cardList[i].shuffle = math.random()
 	end
 	table.sort(self.cardList,cardCompare)
+  if DEBUG then print('Shuffled CardList "'..self.name..'."') end
 end
 
 function CardList:save(filename)

@@ -31,6 +31,7 @@ require 'entities.constructioncard'
 require 'entities.resourcecard'
 require 'entities.spellcard'
 require 'entities.cardlist'
+require 'entities.cardlibrary'
 
 -- ui
 require 'lib.ui.button'
@@ -41,74 +42,61 @@ require 'lib.ui.slider'
 
 cursorImg = nil
 
+cardLibrary = CardLibrary:new()
+
 function love.load(arg)
 
 	if arg[#arg] == "-debug" then require("mobdebug").start() end
 	
-    _font = 'assets/font/OpenSans-Regular.ttf'
-    _fontBold = 'assets/font/OpenSans-Bold.ttf'
-    _fontLight = 'assets/font/OpenSans-Light.ttf'
+  _font = 'assets/font/OpenSans-Regular.ttf'
+  _fontBold = 'assets/font/OpenSans-Bold.ttf'
+  _fontLight = 'assets/font/OpenSans-Light.ttf'
 
-    font = setmetatable({}, {
-        __index = function(t,k)
-            local f = love.graphics.newFont(_font, k)
-            rawset(t, k, f)
-            return f
-        end 
-    })
+  font = setmetatable({}, {
+      __index = function(t,k)
+          local f = love.graphics.newFont(_font, k)
+          rawset(t, k, f)
+          return f
+      end 
+  })
 
-    fontBold = setmetatable({}, {
-        __index = function(t,k)
-            local f = love.graphics.newFont(_fontBold, k)
-            rawset(t, k, f)
-            return f
-        end
-    })
+  fontBold = setmetatable({}, {
+      __index = function(t,k)
+          local f = love.graphics.newFont(_fontBold, k)
+          rawset(t, k, f)
+          return f
+      end
+  })
 
-    fontLight = setmetatable({}, {
-        __index = function(t,k)
-            local f = love.graphics.newFont(_fontLight, k)
-            rawset(t, k, f)
-            return f
-        end 
-    })
+  fontLight = setmetatable({}, {
+      __index = function(t,k)
+          local f = love.graphics.newFont(_fontLight, k)
+          rawset(t, k, f)
+          return f
+      end 
+  })
 
-    love.window.setIcon(love.image.newImageData('assets/img/icon.png'))
-    love.graphics.setDefaultFilter("nearest", "nearest")
-    love.graphics.setFont(font[14])
+  love.window.setIcon(love.image.newImageData('assets/img/icon.png'))
+  love.graphics.setDefaultFilter("nearest", "nearest")
+  love.graphics.setFont(font[14])
 
-    state.registerEvents()
-    state.switch(menu)
+  state.registerEvents()
+  state.switch(menu)
 
-    math.randomseed(os.time()/10)
+  math.randomseed(os.time()/10)
 
-    -- Sound is instantiated before the game because it observes things beyond the game scope
-    soundManager = Sound:new()
+  -- Sound is instantiated before the game because it observes things beyond the game scope
+  soundManager = Sound:new()
 
-    if not love.filesystem.exists(options.file) then
-        options:save(options:getDefaultConfig())
-    end
+  if not love.filesystem.exists(options.file) then
+      options:save(options:getDefaultConfig())
+  end
 
 	cursorImg = love.graphics.newImage('assets/img/circleCursor.png')
 	love.mouse.setVisible(false)
 	
-    options:load()
-	
-  local i, t, popen = 0, {}, io.popen
-  local pfile = popen('dir "states" /b')
-  for filename in pfile:lines() do
-      print(filename)
-  end
-  pfile:close()
+  options:load()
   
-	-- TESTING SAVING OF TABLES
-	cardListAlpha = CardList:new("test")
-	cardListAlpha:addCard(SpellCard:new(game, "1", "Kaiser Reckoning", "If your opponent is an idiot, win the game. So, win the game.", false, {"Dark Magic", "Light Magic","Amazing","Kaiser"}, 10, true))
-	cardListAlpha:addCard(ConstructionCard:new(game, "2", "Kaiser's New Mansion", "If your opponent breathes, win the game.", false, 400, {"House","Kaiser"}, 10, 0, {{"Gold",50},{"Uranium",235},{"Wood",15}}))
-	cardListAlpha:addCard(CreatureCard:new(game, "3", "Kaiser", "The man himself.", false, 420, 500, 1337, {"Boss","Kaiser"}, 10))
-	cardListAlpha:addCard(ResourceCard:new(game, "4", "Kaiserium", "Like Unobtanium but obtainable.", false, {"Metal","Ore","Kaiser"}))
-	table.save({list=cardListAlpha.cardList,numCards=cardListAlpha.numCards},"savedCardList.txt")
-
 end
 
 function love.keypressed(key, code)

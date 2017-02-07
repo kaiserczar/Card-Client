@@ -178,7 +178,7 @@ function game:registerClientEvents()
     end
     
       --(game, card, origX, origY, normalScale, hoverScale, isDefense, doesHover)
-    newCard = DisplayCard:new(self,cardListAlpha.cardList[data.imgNum].card,data.x,data.y,0.5,0.75,false,false)
+    newCard = DisplayCard:new(self,cardLibrary.cardList.cardList[data.imgNum].card,data.x,data.y,0.5,0.75,false,false)
 --		if data.imgNum==1 then
 --			newCard = DisplayCard:new(self,"placeholder",love.graphics.newImage('assets/img/card1.jpg'),1,data.x,data.y,0.5,0.75,false,100,100)
 --		elseif data.imgNum==2 then
